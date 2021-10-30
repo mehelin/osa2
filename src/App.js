@@ -1,11 +1,22 @@
-import React, { useState } from 'react'
-//import Note from './components/Note'
+import React, { useState, useEffect } from 'react'
+import Note from './components/Note'
+import Notification from './components/Notification'
+import Footer from './components/Footer'
+import noteService from './services/notes'
 
-/*
-const App = (props) => {
-  const [notes, setNotes] = useState(props.notes)
+const App = () => {
+  const [notes, setNotes] = useState([])
   const [newNote, setNewNote] = useState('')
   const [showAll, setShowAll] = useState(false)
+  const [errorMessage, setErrorMessage] = useState(null)
+
+  useEffect(() => {
+    noteService
+      .getAll()
+      .then(initialNotes => {
+      setNotes(initialNotes)
+    })
+  }, [])
 
   const addNote = (event) => {
     event.preventDefault()
@@ -13,11 +24,33 @@ const App = (props) => {
       content: newNote,
       date: new Date().toISOString(),
       important: Math.random() > 0.5,
-      id: notes.length + 1,
     }
 
-    setNotes(notes.concat(noteObject))
-    setNewNote('')
+    noteService
+      .create(noteObject)
+        .then(returnedNote => {
+        setNotes(notes.concat(returnedNote))
+        setNewNote('')
+      })
+  }
+
+  const toggleImportanceOf = id => {
+    const note = notes.find(n => n.id === id)
+    const changedNote = { ...note, important: !note.important }
+  
+    noteService
+    .update(id, changedNote)
+      .then(returnedNote => {
+      setNotes(notes.map(note => note.id !== id ? note : returnedNote))
+    })
+    .catch(error => {
+      setErrorMessage(
+        `Note '${note.content}' was already removed from server`
+      )
+      setTimeout(() => {
+        setErrorMessage(null)
+      }, 5000)
+    })    
   }
 
   const handleNoteChange = (event) => {
@@ -31,44 +64,12 @@ const App = (props) => {
 
   return (
     <div>
-      <h2>Puhelinluettelo</h2>
-      <div>
-        <button onClick={() => setShowAll(!showAll)}>
-          show {showAll ? 'important' : 'all' }
-        </button>
-      </div>   
-      <ul>
-        {notesToShow.map(note => 
-            <Note key={note.id} note={note} />
-        )}
-      </ul>
-      <form onSubmit={addNote}>
-        <input
-          value={newNote}
-          onChange={handleNoteChange}
-        />
-        <button type="submit">save</button>
-      </form>  
-    </div>
-  )
-} */
-
-// window.alert(message);
-// alert("message");
-
-const App = () => {
-  const [ persons, setPersons] = useState([
-    { nimi: 'Arto Hellas' }
-  ]) 
-  const [ newnimi, setNewnimi ] = useState('')
-
-  return (
-    <div>
-      <h2>Puhelinluettelo</h2>
+      <h1>Puhelinluettelo</h1>
+      <Notification message={errorMessage} />
       <form>
       <div>suodata <input /></div>
       </form>
-      <h2>Lisää uusi</h2>
+      <h1>Lisää uusi</h1>
       <div>
           nimi: <input />
         </div>
@@ -76,11 +77,19 @@ const App = () => {
         <div>
           <button type="submit">lisää</button>
         </div>
-      <h2>Numerot</h2>
-      <div>debug: {newnimi}</div>
+      <div>
+      </div> 
+        <h1>Numerot</h1>
+      <form onSubmit={addNote}>
+        <input
+          value={newNote}
+          onChange={handleNoteChange}
+        />
+        <button type="submit">save</button>
+      </form>  
+      <Footer />
     </div>
   )
-
 }
 
 export default App
