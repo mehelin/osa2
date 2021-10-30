@@ -1,80 +1,95 @@
-import React from 'react'
-import Course from './components/Course'
+import React, { useState, useEffect } from 'react'
+import Note from './components/Note'
+import Notification from './components/Notification'
+import Footer from './components/Footer'
+import noteService from './services/notes'
 
-/*const Note = ({ note }) => {
-  return (
-    <li>{note.content}</li>
-  )
-}*/
+const App = () => {
+  const [notes, setNotes] = useState([])
+  const [newNote, setNewNote] = useState('')
+  const [showAll, setShowAll] = useState(false)
+  const [errorMessage, setErrorMessage] = useState(null)
 
-/*const App = () => {
-  const courses = [
-    {
-      name: 'Half Stack application development',
-      id: 1,
-      parts: [
-        {
-          name: 'Fundamentals of React',
-          exercises: 10,
-          id: 1
-        },
-        {
-          name: 'Using props to pass data',
-          exercises: 7,
-          id: 2
-        },
-        {
-          name: 'State of a component',
-          exercises: 14,
-          id: 3
-        },
-        {
-          name: 'Redux',
-          exercises: 11,
-          id: 4
-        }
-      ]
-    }, 
-    {
-      name: 'Node.js',
-      id: 2,
-      parts: [
-        {
-          name: 'Routing',
-          exercises: 3,
-          id: 1
-        },
-        {
-          name: 'Middlewares',
-          exercises: 7,
-          id: 2
-        }
-      ]
+  useEffect(() => {
+    noteService
+      .getAll()
+      .then(initialNotes => {
+      setNotes(initialNotes)
+    })
+  }, [])
+
+  const addNote = (event) => {
+    event.preventDefault()
+    const noteObject = {
+      content: newNote,
+      date: new Date().toISOString(),
+      important: Math.random() > 0.5,
     }
-  ]
-*/
-const App = ({ courses }) => {
+
+    noteService
+      .create(noteObject)
+        .then(returnedNote => {
+        setNotes(notes.concat(returnedNote))
+        setNewNote('')
+      })
+  }
+
+  const toggleImportanceOf = id => {
+    const note = notes.find(n => n.id === id)
+    const changedNote = { ...note, important: !note.important }
+  
+    noteService
+    .update(id, changedNote)
+      .then(returnedNote => {
+      setNotes(notes.map(note => note.id !== id ? note : returnedNote))
+    })
+    .catch(error => {
+      setErrorMessage(
+        `Note '${note.content}' was already removed from server`
+      )
+      setTimeout(() => {
+        setErrorMessage(null)
+      }, 5000)
+    })    
+  }
+
+  const handleNoteChange = (event) => {
+    console.log(event.target.value)
+    setNewNote(event.target.value)
+  }
+
+  const notesToShow = showAll
+  ? notes
+  : notes.filter(note => note.important)
+
   return (
     <div>
-      <h1>Web development curriculum</h1>
-      {courses.map((courses) => (
-        <Course courses={courses} key={courses.id} />
-      ))}
-     
-      
-    </div>
-  );
-};
-  /*return (
-    <div>
-      <h1>Notes</h1>
-      <ul>
-        {notes.map(note => 
-          <Note key={note.id} note={note} />
-        )}
-      </ul>
+      <h1>Puhelinluettelo</h1>
+      <Notification message={errorMessage} />
+      <form>
+      <div>suodata <input /></div>
+      </form>
+      <h1>Lisää uusi</h1>
+      <div>
+          nimi: <input />
+        </div>
+        <div>numero: <input /></div>
+        <div>
+          <button type="submit">lisää</button>
+        </div>
+      <div>
+      </div> 
+        <h1>Numerot</h1>
+      <form onSubmit={addNote}>
+        <input
+          value={newNote}
+          onChange={handleNoteChange}
+        />
+        <button type="submit">save</button>
+      </form>  
+      <Footer />
     </div>
   )
-}*/
+}
 
-export default App;
+export default App
