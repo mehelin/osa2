@@ -1,3 +1,21 @@
+import React from 'react';
+import ReactDOM from 'react-dom';
+import App from './App';
+import './index.css'
+import axios from 'axios'
+
+axios
+  .get('http://localhost:3001/notes')
+  .then(response => {
+    const notes = response.data
+    console.log(notes)
+  })
+ReactDOM.render(
+<App />, 
+document.getElementById('root')
+)
+
+/*
 import React from 'react'
 import ReactDOM from 'react-dom'
 import App from './App.js'
@@ -47,5 +65,5 @@ const courses = [
   }
 ]
 
-ReactDOM.render(<App courses={courses}/>, document.getElementById('root'))
+ReactDOM.render(<App courses={courses}/>, document.getElementById('root'))*/
 
