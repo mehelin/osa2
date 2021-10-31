@@ -1,0 +1,10 @@
+h1 {
+  color: pink;
+  font-style: italic;
+}
+
+.name {
+  color: darkmagenta;
+  padding-top: 3px;
+  font-size: 15px;
+}
