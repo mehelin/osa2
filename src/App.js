@@ -1,93 +1,87 @@
 import React, { useState, useEffect } from 'react'
-import Note from './components/Note'
-import Notification from './components/Notification'
-import Footer from './components/Footer'
-import noteService from './services/notes'
+import axios from 'axios'
+import Filter from './components/Filter';
+import Persons from './components/Persons';
+import PersonForm from './components/PersonForm';
+
+
 
 const App = () => {
-  const [notes, setNotes] = useState([])
-  const [newNote, setNewNote] = useState('')
-  const [showAll, setShowAll] = useState(false)
-  const [errorMessage, setErrorMessage] = useState(null)
+  const [persons, setPersons] = useState([])
+  const [newName, setNewName] = useState('')
+  const [newNumber, setNewNumber] = useState('')
+  const [newFilter, setNewFilter] = useState('')
 
   useEffect(() => {
-    noteService
-      .getAll()
-      .then(initialNotes => {
-      setNotes(initialNotes)
-    })
+    console.log('effect')
+    axios
+      .get('http://localhost:3001/persons')
+      .then(response => {
+        console.log('promise fulfilled')
+        setPersons(response.data)
+      })
   }, [])
 
-  const addNote = (event) => {
+console.log('render', persons.length,'persons')
+  
+
+// window.confirm() kehottaa selainta näyttämään valintaikkunan, 
+// jossa on valinnainen viesti, ja odottamaan, kunnes käyttäjä 
+// joko vahvistaa tai peruuttaa valintaikkunan.
+
+  const addPerson = (event) => {
     event.preventDefault()
-    const noteObject = {
-      content: newNote,
-      date: new Date().toISOString(),
-      important: Math.random() > 0.5,
+    if (persons.some(person => person.name === newName)) {
+        window.alert(`${newName} on jo puhelinluettelossa`)
+        return
+    }
+    const personObject = {
+        name: newName,
+        number: newNumber,
+        date: new Date().toISOString(),
     }
 
-    noteService
-      .create(noteObject)
-        .then(returnedNote => {
-        setNotes(notes.concat(returnedNote))
-        setNewNote('')
-      })
+    setPersons(persons.concat(personObject))
+    setNewName('')
+    setNewNumber('')
+}
+
+
+  const handlePersonChange = (event) => {
+    setNewName(event.target.value)
   }
 
-  const toggleImportanceOf = id => {
-    const note = notes.find(n => n.id === id)
-    const changedNote = { ...note, important: !note.important }
-  
-    noteService
-    .update(id, changedNote)
-      .then(returnedNote => {
-      setNotes(notes.map(note => note.id !== id ? note : returnedNote))
-    })
-    .catch(error => {
-      setErrorMessage(
-        `Note '${note.content}' was already removed from server`
-      )
-      setTimeout(() => {
-        setErrorMessage(null)
-      }, 5000)
-    })    
+  const handleNumberChange = (event) => {
+    setNewNumber(event.target.value)
   }
 
-  const handleNoteChange = (event) => {
-    console.log(event.target.value)
-    setNewNote(event.target.value)
+  const handleFilterChange = (event) => {
+    setNewFilter(event.target.value)
+
   }
 
-  const notesToShow = showAll
-  ? notes
-  : notes.filter(note => note.important)
 
   return (
     <div>
       <h1>Puhelinluettelo</h1>
-      <Notification message={errorMessage} />
-      <form>
-      <div>suodata <input /></div>
-      </form>
+
+      <Filter persons={newFilter}
+      handleFilterChange={handleFilterChange}
+      />
+
       <h1>Lisää uusi</h1>
-      <div>
-          nimi: <input />
-        </div>
-        <div>numero: <input /></div>
-        <div>
-          <button type="submit">lisää</button>
-        </div>
-      <div>
-      </div> 
-        <h1>Numerot</h1>
-      <form onSubmit={addNote}>
-        <input
-          value={newNote}
-          onChange={handleNoteChange}
-        />
-        <button type="submit">save</button>
-      </form>  
-      <Footer />
+
+      <PersonForm persons={persons} 
+      setPersons={setPersons} 
+      setNewName={setNewName}  
+      setNewNumber={setNewNumber}
+      handlePersonChange={handlePersonChange} 
+      newNumber={newNumber} 
+      handleNumberChange={handleNumberChange} 
+      newName={newName} addPerson={addPerson}
+      />
+      <h1>Numerot</h1>
+      <Persons persons={persons} newFilter={newFilter}/>
     </div>
   )
 }
