@@ -7,6 +7,8 @@
     "@testing-library/react": "^11.2.7",
     "@testing-library/user-event": "^12.8.3",
     "axios": "^0.24.0",
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-scripts": "4.0.3",
@@ -14,6 +16,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
+    "dev": "nodemon index.js",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
@@ -37,9 +40,9 @@
       "last 1 safari version"
     ]
   },
-   "devDependencies": {
-     "json-server": "^0.16.3",
-     "nodemon": "^2.0.14"
+  "devDependencies": {
+    "json-server": "^0.17.0",
+    "nodemon": "^2.0.14"
   },
-    "proxy": "http://localhost:3001"
- }
+  "proxy": "http://localhost:3001"
+}
